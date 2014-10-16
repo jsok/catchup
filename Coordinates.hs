@@ -1,5 +1,13 @@
 -- Coordinate systems uses in a hexagonal grid map
-module Coordinates where
+module Coordinates (
+    Coordinate(..),
+    Axial(..),
+    Cube(..),
+    distance, distanceFromOrigin,
+    isValid
+) where
+
+import Data.List (maximum)
 
 class Coordinate c where
   origin  :: c
