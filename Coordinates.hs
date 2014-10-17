@@ -52,3 +52,35 @@ distanceFromOrigin = distance origin
 isValid :: (Coordinate c) => c -> Bool
 isValid c = (x c') + (y c') + (z c') == 0
     where c' = toCube c
+
+
+directions :: [Axial]
+directions = [Axial 1 0, Axial 1 (-1), Axial 0 (-1), Axial (-1) 0, Axial (-1) 1, Axial 0 1]
+
+direction :: Int -> Axial
+direction i = directions !! (i `mod` 6)
+
+scale :: Int -> Axial -> Axial
+scale k a = Axial ((q a) * k) ((r a) * k)
+
+-- neighbour :: Axial -> Int -> Axial
+-- neighbour origin i = Axial ((q origin) + (q d)) ((r origin) + (r d))
+--     where d = directions !! (i `mod` 6)
+
+neighbour :: Axial -> Axial -> Axial
+neighbour origin d = Axial ((q origin) + (q d)) ((r origin) + (r d))
+
+
+-- TODO: zip starting point (each corner) with direction and map to pathInDirection
+-- ring :: Axial -> Int -> [Axial]
+-- ring origin radius = concat $ map (walkBorder h radius) [0..5]
+--     where h = scale (direction 4) radius
+--           border i = take radius $ iterate ((flip neighbour) i) (h i)
+
+walkInDirectionTimes :: Axial -> Int -> Int -> [Axial]
+walkInDirectionTimes h dir 0 = []
+walkInDirectionTimes h dir r = h : walkInDirectionTimes (neighbour h dir) dir (r-1)
+
+pathInDirection :: Axial -> Int -> Axial -> [Axial]
+pathInDirection _ 0 _ = []
+pathInDirection dir r start = start : pathInDirection dir (r-1) (neighbour start dir)
