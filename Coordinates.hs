@@ -1,10 +1,7 @@
 -- Coordinate systems uses in a hexagonal grid map
 module Coordinates (
-    Coordinate(..),
     Axial(..),
-    Cube(..),
-    distance, distanceFromOrigin,
-    isValid
+    ring
 ) where
 
 import Data.List (maximum)
@@ -53,34 +50,31 @@ isValid :: (Coordinate c) => c -> Bool
 isValid c = (x c') + (y c') + (z c') == 0
     where c' = toCube c
 
+rotate :: Int -> [a] -> [a]
+rotate _ [] = []
+rotate n xs = zipWith const (drop n (cycle xs)) xs
 
 directions :: [Axial]
 directions = [Axial 1 0, Axial 1 (-1), Axial 0 (-1), Axial (-1) 0, Axial (-1) 1, Axial 0 1]
 
-direction :: Int -> Axial
-direction i = directions !! (i `mod` 6)
+directionFromIndex :: Int -> Axial
+directionFromIndex i = directions !! (i `mod` 6)
 
 scale :: Int -> Axial -> Axial
 scale k a = Axial ((q a) * k) ((r a) * k)
 
--- neighbour :: Axial -> Int -> Axial
--- neighbour origin i = Axial ((q origin) + (q d)) ((r origin) + (r d))
---     where d = directions !! (i `mod` 6)
+-- Returns the coordinates of each corner of a hexgaon with given radius
+corners :: Int -> [Axial]
+corners r = map (scale r) directions
 
 neighbour :: Axial -> Axial -> Axial
 neighbour origin d = Axial ((q origin) + (q d)) ((r origin) + (r d))
 
+pathInDirection :: Int -> Axial -> Axial -> [Axial]
+pathInDirection 0 _ _ = []
+pathInDirection dist start dir = start : pathInDirection (dist-1) (neighbour start dir) dir
 
--- TODO: zip starting point (each corner) with direction and map to pathInDirection
--- ring :: Axial -> Int -> [Axial]
--- ring origin radius = concat $ map (walkBorder h radius) [0..5]
---     where h = scale (direction 4) radius
---           border i = take radius $ iterate ((flip neighbour) i) (h i)
-
-walkInDirectionTimes :: Axial -> Int -> Int -> [Axial]
-walkInDirectionTimes h dir 0 = []
-walkInDirectionTimes h dir r = h : walkInDirectionTimes (neighbour h dir) dir (r-1)
-
-pathInDirection :: Axial -> Int -> Axial -> [Axial]
-pathInDirection _ 0 _ = []
-pathInDirection dir r start = start : pathInDirection dir (r-1) (neighbour start dir)
+ring :: Int -> [Axial]
+ring radius = concat $ map pathFromTuple vectors
+    where vectors = zip (rotate 4 (corners radius)) directions
+          pathFromTuple = uncurry (pathInDirection radius)
