@@ -39,8 +39,7 @@ cell1 a = "|" ++ coord
 
 cell2 :: Tile -> String
 cell2 t = "|  " ++ who (claimedBy t) ++ "   "
-    where who (Just Player1) = "P1"
-          who (Just Player2) = "P2"
+    where who (Just p) = show p
           who Nothing = "  "
 
 drawN :: Int -> String -> String

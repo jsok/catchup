@@ -8,7 +8,11 @@ module Board (
 import Data.Array.IArray
 import Axial
 
-data Player = Player1 | Player2 deriving (Eq, Show)
+data Player = Player1 | Player2 deriving (Eq)
+
+instance Show Player where
+    show Player1 = "P1"
+    show Player2 = "P2"
 
 data Tile = Tile {
     claimedBy :: Maybe Player
