@@ -2,7 +2,8 @@ module Board (
     Tile(..),
     Board(..), board, claim,
     Player(..),
-    axialToIndex, tileAtIndex
+    axialToIndex, tileAtIndex, tileAtAxial,
+    rowWidth, maxRowWidth
 ) where
 
 import Data.Array.IArray
@@ -41,6 +42,9 @@ updateBoard b idx t = Board ((tiles b)//[(idx, t)]) (radius b)
 tileAtIndex :: Board -> (Int, Int) -> Tile
 tileAtIndex b i = (tiles b)!i
 
+tileAtAxial :: Board -> Axial -> Tile
+tileAtAxial b a = tileAtIndex b (axialToIndex (radius b) a)
+
 claimTile :: Tile -> Player -> Either String Tile
 claimTile (Tile {claimedBy = Nothing}) p = Right (Tile (Just p))
 claimTile (Tile {claimedBy = Just c}) _ = Left ("Tile has already been claimed by " ++ show c)
@@ -51,3 +55,9 @@ claim b a p = case claimTile tile p of
                 Right t -> Right (updateBoard b idx t)
     where idx = axialToIndex (radius b) a
           tile = tileAtIndex b idx
+
+rowWidth :: Board -> Int -> Int
+rowWidth b rowIndex = (maxRowWidth b) - abs(rowIndex)
+
+maxRowWidth :: Board -> Int
+maxRowWidth b = (2 * (radius b)) + 1
