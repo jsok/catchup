@@ -27,7 +27,6 @@ import Board
 spaces = "    "
 peak1 = "   / \\  "
 peak2 = " /     \\"
--- cell2 = "|       "
 trough1 = " \\     /"
 trough2 = "   \\ /  "
 
@@ -46,7 +45,10 @@ drawN :: Int -> String -> String
 drawN n x = concat $ take n $ iterate id x
 
 drawRow :: Board -> Int -> [Axial] -> [String]
-drawRow b radius tiles@(start:_) = peak ++ cell ++ trough
+drawRow b radius tiles@(start:_)
+            | (r start) == 0 = peak ++ cell ++ trough
+            | (r start) < 0  = peak ++ cell
+            | otherwise = cell ++ trough
     where maxWidth = (2 * radius) + 1
           width = (maxWidth - abs(r start))
           tileAt a = tileAtIndex b (axialToIndex radius a)
